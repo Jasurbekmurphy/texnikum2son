@@ -1,0 +1,80 @@
+# texnikum2son.com — 3D interaktiv sayt
+
+Three.js + Tailwind CSS + Vite asosidagi landing sahifa. Bosh ekranda 3D izometrik kampus joylashgan: har bir kasbning o'z ustaxonasi bor, ularni bosish yoki pastki paneldan tanlash mumkin.
+
+## Ishga tushirish
+
+```bash
+npm install
+npm run dev       # http://localhost:5173
+npm run build     # tayyor sayt dist/ papkasida
+npm run preview   # build natijasini ko'rish
+```
+
+## Contabo serverga joylash (texnikum2son.com)
+
+`main` branchiga har push qilinganda GitHub Actions saytni build qiladi va tayyor fayllarni **`dist`** branchiga yozadi. Server faqat shu branchni oladi, unda Node.js kerak emas.
+
+**1. Serverni tayyorlash** (Ubuntu/Debian, `ssh root@SERVER_IP`):
+```bash
+apt update && apt install -y nginx git certbot python3-certbot-nginx
+git clone --depth 1 -b dist https://github.com/Jasurbekmurphy/texnikum2son.git /var/www/texnikum2son
+curl -fsSL https://raw.githubusercontent.com/Jasurbekmurphy/texnikum2son/main/deploy/nginx.conf -o /etc/nginx/sites-available/texnikum2son
+ln -sf /etc/nginx/sites-available/texnikum2son /etc/nginx/sites-enabled/texnikum2son
+rm -f /etc/nginx/sites-enabled/default
+nginx -t && systemctl reload nginx
+ufw allow 'Nginx Full' 2>/dev/null || true
+```
+
+**2. Squarespace → DNS Settings:** `@` va `www` uchun eski A/CNAME yozuvlarini o'chirib, quyidagilarni qo'shing (MX va TXT yozuvlariga tegmang, ular Google Workspace pochtasi uchun):
+
+| Type | Host | Value |
+|---|---|---|
+| A | @ | SERVER_IP |
+| A | www | SERVER_IP |
+
+**3. HTTPS** (DNS serverga qarab bo'lgach, `ping texnikum2son.com` server IP'sini ko'rsatsa):
+```bash
+certbot --nginx -d texnikum2son.com -d www.texnikum2son.com --redirect -m info@texnikum2son.com --agree-tos -n
+```
+
+**Saytni yangilash** (kodni GitHub'ga push qilgandan 1–2 daqiqa keyin):
+```bash
+bash /var/www/texnikum2son/deploy-update.sh
+```
+
+## Ma'lumotlarni o'zgartirish
+
+Barcha matnlar bitta faylda: **`src/data.js`**. Asosiy ma'lumotlar (nom, aloqa, 7 yo'nalish, xodimlar, ko'rsatkichlar) texnikum2son.com dan olingan. `TODO` bilan belgilangan joylarni haqiqiy ma'lumotlar bilan almashtiring:
+
+- `site`: nom, telefon, email, manzil, Telegram/Instagram, xarita (`mapEmbed`), qabul havolasi
+- `stats`: raqamlar (o'quvchilar soni, ishga joylashish foizi...)
+- `professions`: yo'nalishlar (nomi, tavsifi, muddat, o'rinlar, ko'nikmalar)
+- `features`, `steps`, `faqs`: afzalliklar, qabul bosqichlari, savollar
+- `dual`, `metrics`: dual ta'lim bosqichlari va ko'rsatkichlar
+
+## Tuzilishi
+
+```
+index.html            sahifa tuzilishi (Tailwind klasslari)
+src/main.js           UI: panellar, belgilar, sayohat rejimi, animatsiyalar
+src/data.js           kontent
+src/scene/campus.js   3D sahna, kamera, yorug'lik, harakatlar
+src/scene/workshops.js har bir kasb ustaxonasi (3D)
+src/scene/kit.js      3D bloklar (box, daraxt, odam, yozuvlar)
+```
+
+## Imkoniyatlar
+
+- 3D kampus: ustaxonani bosish → kamera uchib boradi, o'ngda batafsil panel ochiladi
+- "Kampus bo'ylab sayohat": yo'nalishlarni avtomatik ko'rsatadi
+- Jonli sahna: yuruvchi o'quvchilar, avtobus, hilpirayotgan bayroq, payvand uchqunlari, bug', lift
+- Galereya: `src/gallery/` papkasiga rasm yoki video tashlang (batafsil: `src/gallery/README.md`)
+- `#kasb-auto` kabi havola bilan to'g'ridan-to'g'ri yo'nalishni ulashish mumkin
+- Mobil uchun moslashgan (bottom-sheet panel, sahifa barmoq bilan bemalol aylanadi)
+- `prefers-reduced-motion` qo'llab-quvvatlanadi; WebGL bo'lmasa sayt 3D'siz ishlaydi
+- Ko'rinmay qolganda 3D render to'xtaydi (batareya tejaladi)
+
+## Hostingga joylash
+
+`npm run build` → `dist/` papkasini hostingga yuklang (cPanel, Netlify, Vercel, Cloudflare Pages yoki GitHub Pages).
