@@ -1,4 +1,5 @@
-import { professions } from './data.js';
+import * as raw from './data.js';
+import { localize, t } from './i18n.js';
 import { icon } from './icons.js';
 
 // src/gallery/ ichidagi rasm va videolar build paytida avtomatik topiladi.
@@ -15,6 +16,7 @@ const fulls = import.meta.glob('./gallery/**/*.{jpg,jpeg,png,webp,JPG,JPEG,PNG,W
 });
 const videos = import.meta.glob('./gallery/**/*.{mp4,webm,MP4,WEBM}', { eager: true, import: 'default', query: '?url' });
 
+const { professions, galleryText } = localize(raw);
 const byProf = new Map(professions.map((p) => [p.id, p]));
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
@@ -22,13 +24,11 @@ function parse(path) {
   const parts = path.replace('./gallery/', '').split('/');
   const file = parts.pop();
   const folder = parts[0] ?? '';
-  const caption = file
-    .replace(/\.[^.]+$/, '')
-    .replace(/[-_ ]*\d+$/, '')
-    .replace(/[-_]+/g, ' ')
-    .trim();
+  const slug = file.replace(/\.[^.]+$/, '').replace(/[-_ ]*\d+$/, '');
+  // Tarjima bo'lsa (src/data.js → galleryText), aks holda fayl nomining o'zi
+  const caption = galleryText.captions[slug] ?? slug.replace(/[-_]+/g, ' ').trim();
   const prof = byProf.get(folder);
-  const other = folder ? cap(folder.replace(/[-_]+/g, ' ')) : 'Kampus';
+  const other = galleryText.folders[folder || 'kampus'] ?? cap(folder.replace(/[-_]+/g, ' '));
   // group: filtr tugmasidagi qisqa nom, title: rasm ustidagi to'liq nom
   const group = prof ? (prof.label ?? prof.title) : other;
   const title = prof ? prof.title : other;
@@ -50,7 +50,7 @@ const tile = (m, i) => {
     : `<img class="kb size-full object-cover" src="${m.thumb}" width="${m.w}" height="${m.h}" alt="${m.caption}" loading="lazy" decoding="async" />`;
   return `<button type="button" class="gal-tile reveal group relative mb-3 block w-full break-inside-avoid overflow-hidden rounded-2xl bg-brand-100 text-left ring-1 ring-white/70 sm:mb-4" style="--d:${(i % 4) * 70}ms;--kx:${(i * 37) % 7 - 3}%;--ky:${(i * 53) % 7 - 3}%;aspect-ratio:${m.w}/${m.h}" data-gal="${i}" aria-label="${m.caption}">
     ${body}
-    ${live ? `<span class="absolute top-3 left-3 flex items-center gap-1.5 rounded-full bg-ink/70 px-2.5 py-1 text-[11px] font-bold text-white backdrop-blur"><span class="size-1.5 animate-pulse rounded-full bg-red-500"></span>JONLI</span>` : ''}
+    ${live ? `<span class="absolute top-3 left-3 flex items-center gap-1.5 rounded-full bg-ink/70 px-2.5 py-1 text-[11px] font-bold text-white backdrop-blur"><span class="size-1.5 animate-pulse rounded-full bg-red-500"></span>${t('live')}</span>` : ''}
     <span class="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink/80 via-ink/30 to-transparent p-3 pt-10 text-white transition duration-500 sm:translate-y-2 sm:opacity-0 sm:group-hover:translate-y-0 sm:group-hover:opacity-100">
       <span class="block text-[11px] font-bold tracking-wider uppercase opacity-80" ${m.color ? `style="color:color-mix(in oklab, ${m.color} 45%, white)"` : ''}>${m.group}</span>
       <span class="block text-sm font-semibold">${m.caption}</span>
@@ -80,16 +80,16 @@ function ensureBox() {
   if (box) return box;
   box = document.createElement('dialog');
   box.className = 'gal-box';
-  box.setAttribute('aria-label', 'Galereya');
+  box.setAttribute('aria-label', t('navGallery'));
   box.innerHTML = `
     <div class="absolute inset-0 grid place-items-center p-3 sm:p-12" data-stage></div>
     <div class="absolute inset-x-0 top-0 flex items-center justify-between gap-3 p-3 text-white sm:p-5">
       <p class="min-w-0 text-sm"><span class="block text-xs font-bold tracking-wider text-sky-300 uppercase" data-group></span><span class="font-semibold" data-cap></span></p>
       <div class="flex items-center gap-2"><span class="text-xs tabular-nums opacity-70" data-num></span>
-      <button class="gal-btn" data-go="x" aria-label="Yopish">${icon('x')}</button></div>
+      <button class="gal-btn" data-go="x" aria-label="${t('close')}">${icon('x')}</button></div>
     </div>
-    <button class="gal-btn absolute top-1/2 left-3 -translate-y-1/2 sm:left-5" data-go="-1" aria-label="Oldingi">${icon('left')}</button>
-    <button class="gal-btn absolute top-1/2 right-3 -translate-y-1/2 sm:right-5" data-go="1" aria-label="Keyingi">${icon('right')}</button>`;
+    <button class="gal-btn absolute top-1/2 left-3 -translate-y-1/2 sm:left-5" data-go="-1" aria-label="${t('prev')}">${icon('left')}</button>
+    <button class="gal-btn absolute top-1/2 right-3 -translate-y-1/2 sm:right-5" data-go="1" aria-label="${t('next')}">${icon('right')}</button>`;
   document.body.append(box);
   box.addEventListener('click', (e) => {
     const go = e.target.closest('[data-go]')?.dataset.go;
@@ -159,7 +159,7 @@ export function renderGallery(onReveal) {
   };
 
   if (groups.length > 1) {
-    chips.innerHTML = ['Barchasi', ...groups]
+    chips.innerHTML = [t('galleryAll'), ...groups]
       .map((g, i) => `<button type="button" class="gal-chip" aria-pressed="${i === 0}" data-group="${i ? g : ''}">${g}</button>`)
       .join('');
     chips.addEventListener('click', (e) => {

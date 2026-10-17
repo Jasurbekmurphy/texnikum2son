@@ -10,9 +10,10 @@ const CAM_DIR = new THREE.Vector3(38, 52, 60).normalize();
 const HOME_TARGET = new THREE.Vector3(0, 0, 3);
 
 export class Campus {
-  constructor(canvas, { professions, onSelect, onHover, reducedMotion = false }) {
+  constructor(canvas, { professions, onSelect, onHover, reducedMotion = false, gateText = '2-SON TEXNIKUM' }) {
     this.canvas = canvas;
     this.professions = professions;
+    this.gateText = gateText;
     this.onSelect = onSelect;
     this.onHover = onHover;
     this.reducedMotion = reducedMotion;
@@ -108,7 +109,7 @@ export class Campus {
       s.add(at(box(0.12, 1.4, 0.16, C.metal, { r: 0.02 }), x, 0.7, 25.8));
     }
     // Darvoza
-    const gate = at(sign('2-SON TEXNIKUM', 6, 0.8, { bg: C.trim, fg: '#ffffff', size: 58 }), 0, 3.4, 25.8);
+    const gate = at(sign(this.gateText, 6, 0.8, { bg: C.trim, fg: '#ffffff', size: 58 }), 0, 3.4, 25.8);
     s.add(gate, at(box(0.4, 3.8, 0.4, C.navy), -3.3, 1.9, 25.8), at(box(0.4, 3.8, 0.4, C.navy), 3.3, 1.9, 25.8));
     const gateBack = gate.clone();
     gateBack.rotation.y = Math.PI;
@@ -185,7 +186,7 @@ export class Campus {
     g.add(at(box(7, 0.3, 3, C.trim, { r: 0.1 }), 0, 3.7, 6.3));
     g.add(at(box(0.25, 3.6, 0.25, C.wall), -3.2, 1.8, 7.5), at(box(0.25, 3.6, 0.25, C.wall), 3.2, 1.8, 7.5));
     g.add(at(box(8, 0.25, 3.4, '#e2e8f0', { r: 0.05 }), 0, 0.12, 6.6));
-    const title = sign('2-SON TEXNIKUM', 9, 1.1, { bg: '#ffffff', fg: C.trim, size: 62 });
+    const title = sign(this.gateText, 9, 1.1, { bg: '#ffffff', fg: C.trim, size: 62 });
     title.position.set(0, 6.6, 5.08);
     g.add(title);
     g.position.set(0, 0, -10);

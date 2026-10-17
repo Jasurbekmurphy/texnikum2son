@@ -52,13 +52,22 @@ Barcha matnlar bitta faylda: **`src/data.js`**. Asosiy ma'lumotlar (nom, aloqa, 
 - `professions`: yo'nalishlar (nomi, tavsifi, muddat, o'rinlar, ko'nikmalar)
 - `features`, `steps`, `faqs`: afzalliklar, qabul bosqichlari, savollar
 - `dual`, `metrics`: dual ta'lim bosqichlari va ko'rsatkichlar
+- `galleryText`: galereya yozuvlari va bo'lim nomlarining tarjimasi
+
+## Ikki til (EN / UZ)
+
+Sayt asosan inglizcha ochiladi, sarlavhadagi **EN / UZ** tugmasi o'zbekchaga o'tkazadi (tanlov eslab qolinadi). To'g'ridan-to'g'ri havola: `https://texnikum2son.com/?lang=uz`.
+
+- `src/data.js` dagi har bir matn `{ en: '...', uz: '...' }` ko'rinishida: ikkala tilni yonma-yon o'zgartiring.
+- Tugmalar, sarlavhalar va boshqa interfeys matnlari: `src/i18n.js` (`UI` lug'ati).
 
 ## Tuzilishi
 
 ```
 index.html            sahifa tuzilishi (Tailwind klasslari)
 src/main.js           UI: panellar, belgilar, sayohat rejimi, animatsiyalar
-src/data.js           kontent
+src/data.js           kontent (en/uz)
+src/i18n.js           til tanlash va interfeys matnlari
 src/scene/campus.js   3D sahna, kamera, yorug'lik, harakatlar
 src/scene/workshops.js har bir kasb ustaxonasi (3D)
 src/scene/kit.js      3D bloklar (box, daraxt, odam, yozuvlar)

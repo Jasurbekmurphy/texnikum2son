@@ -1,6 +1,10 @@
-import { dual, faqs, features, metrics, professions, site, stats, steps } from './data.js';
+import * as raw from './data.js';
+import { applyStatic, lang, LANGS, localize, setLang, t } from './i18n.js';
 import { icon } from './icons.js';
 import { media, mediaFor, openLightbox, renderGallery } from './gallery.js';
+
+// Barcha kontent tanlangan tilga aylantiriladi (src/i18n.js)
+const { dual, faqs, features, metrics, professions, site, stats, steps } = localize(raw);
 
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -11,24 +15,36 @@ const fmt = (n) => n.toLocaleString('ru-RU').replace(/ /g, ' ');
 
 // ---------------- Statik bo'limlar ----------------
 const nav = [
-  ['#kasblar', 'Kasblar'],
-  ['#afzalliklar', 'Afzalliklar'],
-  ...(media.length ? [['#galereya', 'Galereya']] : []),
-  ['#dual', "Dual ta'lim"],
-  ['#qabul', 'Qabul'],
-  ['#savollar', 'Savollar'],
-  ['#aloqa', 'Aloqa'],
+  ['#kasblar', t('navPrograms')],
+  ['#afzalliklar', t('navWhy')],
+  ...(media.length ? [['#galereya', t('navGallery')]] : []),
+  ['#dual', t('navDual')],
+  ['#qabul', t('navAdmission')],
+  ['#savollar', t('navFaq')],
+  ['#aloqa', t('navContact')],
 ];
 
+// EN | UZ almashtirgich
+const langSwitch = () =>
+  `<div class="lang-switch" role="group" aria-label="${t('language')}">${LANGS.map(
+    (l) => `<button type="button" data-lang="${l}" aria-pressed="${l === lang}">${l.toUpperCase()}</button>`,
+  ).join('')}</div>`;
+
 function renderStatic() {
-  const brand = `<span class="grid size-8 place-items-center rounded-lg bg-brand-600 text-white">${icon('cap', 'size-[18px]')}</span><span>${site.shortName}</span>`;
+  applyStatic();
+  $$('[data-slot=lang]').forEach((el) => (el.innerHTML = langSwitch()));
+  document.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-lang]');
+    if (b) setLang(b.dataset.lang);
+  });
+  const brand = `<span class="grid size-8 place-items-center rounded-lg bg-brand-600 text-white">${icon('cap', 'size-[18px]')}</span><span class="truncate">${site.shortName}</span>`;
   $('[data-slot=brand]').innerHTML = brand;
   $$('[data-slot=apply]').forEach((a) => Object.assign(a, { href: site.admission.applyUrl, target: '_blank', rel: 'noopener' }));
 
-  const links = nav.map(([h, t]) => `<a href="${h}" class="rounded-lg px-3 py-2 transition hover:bg-brand-50 hover:text-brand-600">${t}</a>`).join('');
+  const links = nav.map(([h, text]) => `<a href="${h}" class="rounded-lg px-3 py-2 transition hover:bg-brand-50 hover:text-brand-600">${text}</a>`).join('');
   $('#navLinks').innerHTML = links;
   $('#mobileMenu').innerHTML =
-    links + `<a class="btn-primary mt-1" href="${site.admission.applyUrl}" target="_blank" rel="noopener">Hujjat topshirish</a>`;
+    links + `<a class="btn-primary mt-1" href="${site.admission.applyUrl}" target="_blank" rel="noopener">${t('apply')}</a>`;
   const menuBtn = $('#menuBtn');
   menuBtn.innerHTML = icon('menu');
   menuBtn.addEventListener('click', () => {
@@ -40,9 +56,9 @@ function renderStatic() {
 
   const open = site.admission.open;
   $('#admissionBadge').innerHTML = open
-    ? `<span class="size-1.5 animate-pulse rounded-full bg-emerald-500"></span>Qabul ochiq`
-    : 'Qabul yopiq';
-  $('#introEyebrow').textContent = open ? `Qabul ochiq · ${site.admission.deadline}gacha` : site.slogan;
+    ? `<span class="size-1.5 animate-pulse rounded-full bg-emerald-500"></span>${t('admissionOpen')}`
+    : t('admissionClosed');
+  $('#introEyebrow').textContent = open ? t('openUntil', site.admission.deadline) : site.slogan;
 
   $('#heroStats').innerHTML = stats
     .slice(0, 3)
@@ -72,13 +88,13 @@ function renderStatic() {
         <h3 class="mt-5 text-xl font-bold">${p.title}</h3>
         <p class="mt-2 flex-1 text-[15px] leading-relaxed text-slate-600">${p.desc}</p>
         <div class="mt-5 flex flex-wrap gap-1.5 text-xs font-semibold">
-          ${[p.duration, p.form, p.seats && `${p.seats} o'rin`]
+          ${[p.duration, p.form, p.seats && t('seatsTag', p.seats)]
             .filter(Boolean)
             .map((t) => `<span class="rounded-full bg-slate-100 px-2.5 py-1">${t}</span>`)
             .join('')}
         </div>
         <a href="#" data-show="${p.id}" class="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold" style="color:${p.color}">
-          3D kampusda ko'rish ${icon('arrow', 'size-4 transition group-hover:translate-x-1')}
+          ${t('viewIn3d')} ${icon('arrow', 'size-4 transition group-hover:translate-x-1')}
         </a>
       </article>`,
     )
@@ -138,10 +154,10 @@ function renderStatic() {
     .join('');
 
   const contact = [
-    ['phone', 'Telefon', site.phone, `tel:${site.phone.replace(/\s/g, '')}`],
-    ['mail', 'Email', site.email, `mailto:${site.email}`],
-    ['pin', 'Manzil', site.address],
-    ['clock', 'Ish vaqti', site.workHours],
+    ['phone', t('phone'), site.phone, `tel:${site.phone.replace(/\s/g, '')}`],
+    ['mail', t('email'), site.email, `mailto:${site.email}`],
+    ['pin', t('address'), site.address],
+    ['clock', t('hours'), site.workHours],
   ];
   $('#contacts').innerHTML = contact
     .map(
@@ -156,10 +172,10 @@ function renderStatic() {
     ['send', 'Telegram', site.telegram],
     ['instagram', 'Instagram', site.instagram],
   ]
-    .map(([ic, t, h]) => `<a class="btn bg-white/15 text-white hover:bg-white/25" href="${h}" target="_blank" rel="noopener">${icon(ic, 'size-4')}${t}</a>`)
+    .map(([ic, name, h]) => `<a class="btn bg-white/15 text-white hover:bg-white/25" href="${h}" target="_blank" rel="noopener">${icon(ic, 'size-4')}${name}</a>`)
     .join('');
   $('#map').innerHTML = site.mapEmbed
-    ? `<iframe class="size-full min-h-[280px]" src="${site.mapEmbed}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Xarita"></iframe>`
+    ? `<iframe class="size-full min-h-[280px]" src="${site.mapEmbed}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="${t('map')}"></iframe>`
     : `<div class="grid size-full min-h-[280px] place-items-center text-center text-brand-100"><div>${icon('pin', 'mx-auto size-10')}<p class="mt-2 px-6">${site.address}</p></div></div>`;
 
   $('#footer').innerHTML = `<p>© ${new Date().getFullYear()} ${site.fullName}</p><p>${site.domain}</p>`;
@@ -186,9 +202,9 @@ function renderDock() {
   });
 
   $('#mapCtrls').innerHTML = [
-    ['plus', 'zoomIn', 'Yaqinlashtirish'],
-    ['minus', 'zoomOut', 'Uzoqlashtirish'],
-    ['home', 'home', 'Butun kampus'],
+    ['plus', 'zoomIn', t('zoomIn')],
+    ['minus', 'zoomOut', t('zoomOut')],
+    ['home', 'home', t('home')],
   ]
     .map(([ic, act, label]) => `<button class="ctrl" data-act="${act}" aria-label="${label}" title="${label}">${icon(ic, 'size-[18px]')}</button>`)
     .join('');
@@ -223,7 +239,7 @@ function renderPins() {
 function photoStrip(p) {
   const items = mediaFor(p.id);
   if (!items.length) return '';
-  return `<p class="mt-4 text-xs font-bold tracking-wider text-slate-400 uppercase">Ustaxonadan suratlar</p>
+  return `<p class="mt-4 text-xs font-bold tracking-wider text-slate-400 uppercase">${t('workshopPhotos')}</p>
     <div class="no-scrollbar -mx-1 mt-2 flex gap-2 overflow-x-auto px-1 pb-1">${items
       .slice(0, 8)
       .map(
@@ -241,28 +257,28 @@ function renderDetail(p) {
     <div class="flex items-start gap-3">
       <div class="grid size-12 shrink-0 place-items-center rounded-2xl text-white shadow-lg" style="background:${p.color}">${icon(p.prop, 'size-6')}</div>
       <div class="min-w-0 flex-1">
-        <p class="text-[11px] font-bold tracking-widest uppercase" style="color:${p.color}">Yo'nalish · ${String(i + 1).padStart(2, '0')}/${String(professions.length).padStart(2, '0')}</p>
+        <p class="text-[11px] font-bold tracking-widest uppercase" style="color:${p.color}">${t('program')} · ${String(i + 1).padStart(2, '0')}/${String(professions.length).padStart(2, '0')}</p>
         <h2 class="text-lg leading-tight font-extrabold">${p.title}</h2>
         <p class="text-sm text-slate-500">${p.short}</p>
       </div>
       <div class="flex gap-1">
-        <button class="ctrl size-8 ring-1 ring-slate-200 sm:size-9" data-nav="-1" aria-label="Oldingi">${icon('left', 'size-4')}</button>
-        <button class="ctrl size-8 ring-1 ring-slate-200 sm:size-9" data-nav="1" aria-label="Keyingi">${icon('right', 'size-4')}</button>
-        <button class="ctrl size-8 ring-1 ring-slate-200 sm:size-9" data-nav="0" aria-label="Yopish">${icon('x', 'size-4')}</button>
+        <button class="ctrl size-8 ring-1 ring-slate-200 sm:size-9" data-nav="-1" aria-label="${t('prev')}">${icon('left', 'size-4')}</button>
+        <button class="ctrl size-8 ring-1 ring-slate-200 sm:size-9" data-nav="1" aria-label="${t('next')}">${icon('right', 'size-4')}</button>
+        <button class="ctrl size-8 ring-1 ring-slate-200 sm:size-9" data-nav="0" aria-label="${t('close')}">${icon('x', 'size-4')}</button>
       </div>
     </div>
     <div class="mt-4 flex items-center gap-2 text-xs font-semibold">
-      <span class="rounded-md bg-emerald-50 px-2 py-1 text-emerald-700">${site.admission.open ? 'Qabul ochiq' : 'Qabul yopiq'}</span>
+      <span class="rounded-md bg-emerald-50 px-2 py-1 text-emerald-700">${site.admission.open ? t('admissionOpen') : t('admissionClosed')}</span>
       <span class="text-slate-500">${[p.duration, p.form].filter(Boolean).join(' · ')}</span>
     </div>
     <p class="mt-3 text-[15px] leading-relaxed text-slate-600">${p.desc}</p>
-    <div class="mt-3">${p.duration ? row("O'qish muddati", p.duration) : ''}${row("Ta'lim shakli", p.form)}${p.seats ? row("O'rinlar soni", `${p.seats} ta`) : ''}</div>
+    <div class="mt-3">${p.duration ? row(t('duration'), p.duration) : ''}${row(t('studyMode'), p.form)}${p.seats ? row(t('places'), t('placesValue', p.seats)) : ''}</div>
     ${photoStrip(p)}
-    <p class="mt-4 text-xs font-bold tracking-wider text-slate-400 uppercase">O'rganasiz</p>
+    <p class="mt-4 text-xs font-bold tracking-wider text-slate-400 uppercase">${t('youLearn')}</p>
     <div class="mt-2 flex flex-wrap gap-1.5">${p.skills.map((s) => `<span class="rounded-lg px-2.5 py-1 text-xs font-semibold" style="background:${p.color}14;color:${p.color}">${s}</span>`).join('')}</div>
-    <p class="mt-4 text-xs font-bold tracking-wider text-slate-400 uppercase">Kim bo'lib ishlaysiz</p>
+    <p class="mt-4 text-xs font-bold tracking-wider text-slate-400 uppercase">${t('careers')}</p>
     <ul class="mt-2 space-y-1.5 text-sm">${p.careers.map((c) => `<li class="flex items-center gap-2"><span class="text-emerald-500">${icon('check', 'size-4')}</span>${c}</li>`).join('')}</ul>
-    <a class="btn-primary mt-5 w-full" href="${site.admission.applyUrl}" target="_blank" rel="noopener">Shu yo'nalishga hujjat topshirish ${icon('arrow', 'size-4')}</a>`;
+    <a class="btn-primary mt-5 w-full" href="${site.admission.applyUrl}" target="_blank" rel="noopener">${t('applyProgram')} ${icon('arrow', 'size-4')}</a>`;
 }
 
 function select(id) {
@@ -308,7 +324,7 @@ function step(dir) {
 }
 
 function setTourBtn(playing) {
-  $('#tourBtn').innerHTML = playing ? `${icon('pause', 'size-4')} Sayohatni to'xtatish` : `${icon('play', 'size-4')} Kampus bo'ylab sayohat`;
+  $('#tourBtn').innerHTML = playing ? `${icon('pause', 'size-4')} ${t('tourStop')}` : `${icon('play', 'size-4')} ${t('tourPlay')}`;
 }
 
 function startTour() {
@@ -371,6 +387,7 @@ async function initCampus() {
     campus = new Campus(canvas, {
       professions,
       reducedMotion,
+      gateText: t('gateSign'),
       onSelect: (id) => userSelect(id),
       onHover: (id) => $$('#pins .pin-body').forEach((b) => b.classList.toggle('scale-110', b.parentElement.dataset.id === id)),
     });

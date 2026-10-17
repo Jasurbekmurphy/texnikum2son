@@ -130,6 +130,15 @@ details[open] .chev {
 .gal-tile:hover {
   box-shadow: 0 18px 40px -18px rgba(29, 78, 216, 0.45);
 }
+.lang-switch {
+  @apply flex rounded-lg bg-slate-100 p-0.5 text-xs font-bold;
+}
+.lang-switch button {
+  @apply rounded-md px-2 py-1.5 text-slate-500 transition hover:text-ink;
+}
+.lang-switch button[aria-pressed='true'] {
+  @apply bg-white text-brand-600 shadow-sm;
+}
 .gal-chip {
   @apply shrink-0 rounded-full bg-white px-4 py-2 text-sm font-semibold text-slate-600 ring-1 ring-slate-200 transition hover:ring-brand-500;
 }
