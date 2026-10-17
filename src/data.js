@@ -22,7 +22,7 @@ export const site = {
   // Google Maps → Ulashish → Xaritani joylashtirish → src manzili
   mapEmbed: '', // TODO
   admission: {
-    open: true,
+    open: false, // qabul ochilganda: true
     deadline: { en: 'August 25', uz: '25-avgust' }, // TODO: tekshiring
     applyUrl: 'https://my.edu.uz', // TODO: hujjat topshirish havolasi
   },

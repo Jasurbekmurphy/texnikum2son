@@ -55,9 +55,14 @@ function renderStatic() {
   $$('#mobileMenu a').forEach((a) => a.addEventListener('click', () => menuBtn.click()));
 
   const open = site.admission.open;
-  $('#admissionBadge').innerHTML = open
+  const badge = $('#admissionBadge');
+  badge.innerHTML = open
     ? `<span class="size-1.5 animate-pulse rounded-full bg-emerald-500"></span>${t('admissionOpen')}`
-    : t('admissionClosed');
+    : `<span class="size-1.5 rounded-full bg-slate-400"></span>${t('admissionClosed')}`;
+  if (!open) {
+    badge.classList.replace('bg-emerald-50', 'bg-slate-100');
+    badge.classList.replace('text-emerald-700', 'text-slate-600');
+  }
   $('#introEyebrow').textContent = open ? t('openUntil', site.admission.deadline) : site.slogan;
 
   $('#heroStats').innerHTML = stats
@@ -268,7 +273,7 @@ function renderDetail(p) {
       </div>
     </div>
     <div class="mt-4 flex items-center gap-2 text-xs font-semibold">
-      <span class="rounded-md bg-emerald-50 px-2 py-1 text-emerald-700">${site.admission.open ? t('admissionOpen') : t('admissionClosed')}</span>
+      <span class="rounded-md px-2 py-1 ${site.admission.open ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'}">${site.admission.open ? t('admissionOpen') : t('admissionClosed')}</span>
       <span class="text-slate-500">${[p.duration, p.form].filter(Boolean).join(' · ')}</span>
     </div>
     <p class="mt-3 text-[15px] leading-relaxed text-slate-600">${p.desc}</p>

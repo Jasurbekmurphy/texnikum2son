@@ -43,7 +43,7 @@ const UI = {
     uz: "Paxtaobod tuman 2-son texnikumi: raqamli axborotlar, oshpazlik, tikuvchilik, avtoservis, metallga ishlov, payvandchilik va turar joy servisi. Kunduzgi va dual ta'lim, interaktiv 3D kampus.",
   },
   ogTitle: { en: 'Paxtaobod Technical School No. 2: 3D campus', uz: 'Paxtaobod tuman 2-son texnikumi: 3D kampus' },
-  ogDesc: { en: 'Choose your profession in an interactive 3D campus. Admission is open.', uz: 'Kasbingizni interaktiv 3D kampusda tanlang. Qabul ochiq.' },
+  ogDesc: { en: 'Choose your profession in an interactive 3D campus.', uz: 'Kasbingizni interaktiv 3D kampusda tanlang.' },
 
   language: { en: 'Language', uz: 'Til' },
   menu: { en: 'Menu', uz: 'Menyu' },
