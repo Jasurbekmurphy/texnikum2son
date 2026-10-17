@@ -67,6 +67,32 @@ export function at(obj, x, y, z) {
   return obj;
 }
 
+// Hovli plitkalari: 4x4 plitka bitta teksturada, maydon bo'ylab takrorlanadi
+export function pavingTexture(tilesX, tilesY) {
+  const n = 4;
+  const px = 128;
+  const cv = document.createElement('canvas');
+  cv.width = cv.height = n * px;
+  const ctx = cv.getContext('2d');
+  ctx.fillStyle = '#d5deef';
+  ctx.fillRect(0, 0, cv.width, cv.height);
+  const shades = ['#f3f6fd', '#eef2fb', '#f6f8fe', '#ebf0fa'];
+  let seed = 7;
+  const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+  for (let y = 0; y < n; y++) {
+    for (let x = 0; x < n; x++) {
+      ctx.fillStyle = shades[Math.floor(rnd() * shades.length)];
+      ctx.fillRect(x * px + 4, y * px + 4, px - 8, px - 8);
+    }
+  }
+  const tex = new THREE.CanvasTexture(cv);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(tilesX / n, tilesY / n);
+  tex.anisotropy = 8;
+  return tex;
+}
+
 // Ikki nuqta orasidagi tekis yo'lak
 export function strip(ax, az, bx, bz, width, color, y = 0.03, h = 0.06) {
   const len = Math.hypot(bx - ax, bz - az);

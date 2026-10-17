@@ -2,7 +2,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-import { C, at, box, cyl, mat, person, sign, sph, strip, tree } from './kit.js';
+import { C, at, box, cyl, mat, pavingTexture, person, sign, sph, strip, tree } from './kit.js';
 import { buildWorkshop } from './workshops.js';
 
 const PLAZA = new THREE.Vector3(0, 0, 6);
@@ -94,8 +94,16 @@ export class Campus {
     under.position.y = -1.6;
     under.receiveShadow = true;
     s.add(under);
-    s.add(at(box(76, 1.6, 60, C.baseSide, { r: 0.6 }), 0, -0.8, 4));
-    s.add(at(box(75, 0.2, 59, C.base, { r: 0.08, cast: false }), 0, -0.1, 4));
+    // Qatlamlar ustma-ust tushmasin: bir xil balandlikdagi yuzalar telefonda miltillaydi
+    s.add(at(box(76, 1.6, 60, C.baseSide, { r: 0.6 }), 0, -0.9, 4));
+    s.add(at(box(75, 0.2, 59, C.base, { r: 0.08, cast: false }), 0, -0.15, 4));
+    const tiles = new THREE.Mesh(
+      new THREE.PlaneGeometry(74.8, 58.8),
+      new THREE.MeshStandardMaterial({ map: pavingTexture(47, 37), roughness: 0.85, metalness: 0.02 }),
+    );
+    tiles.rotation.x = -Math.PI / 2;
+    tiles.receiveShadow = true;
+    s.add(at(tiles, 0, 0, 4));
 
     // Yo'l va mashinalar
     s.add(at(box(75, 0.08, 6.4, C.road, { r: 0.02, cast: false }), 0, 0.04, 29.6));
