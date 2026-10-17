@@ -169,6 +169,29 @@ details[open] .chev {
     opacity: 0;
   }
 }
+.news-box {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow-y: auto;
+  background: rgba(10, 18, 40, 0.7);
+  backdrop-filter: blur(4px);
+}
+.news-box[open] {
+  animation: gal-in 0.25s ease;
+}
+.news-box::backdrop {
+  background: transparent;
+}
+.news-body p + p {
+  margin-top: 0.85em;
+}
 .gal-media {
   max-width: 100%;
   max-height: calc(100svh - 120px);
@@ -193,4 +216,24 @@ details[open] .chev {
     transform: none;
     transition: none;
   }
+}
+
+/* ---------------- Admin panel ---------------- */
+.card {
+  @apply rounded-3xl bg-white p-5 ring-1 ring-slate-200 sm:p-6;
+}
+.card-title {
+  @apply text-lg font-extrabold;
+}
+.field {
+  @apply flex flex-col gap-1.5 text-sm font-semibold text-slate-700;
+}
+.field :is(input, select, textarea) {
+  @apply w-full rounded-xl border-0 bg-slate-50 px-3.5 py-2.5 text-base font-normal text-ink ring-1 ring-slate-200 transition outline-none focus:bg-white focus:ring-2 focus:ring-brand-500;
+}
+.field input[type='file'] {
+  @apply py-2 text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-brand-50 file:px-3 file:py-1.5 file:font-semibold file:text-brand-600;
+}
+.toggle {
+  @apply size-5 accent-brand-600;
 }

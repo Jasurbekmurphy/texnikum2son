@@ -43,6 +43,22 @@ certbot --nginx -d texnikum2son.com -d www.texnikum2son.com --redirect -m info@t
 bash /var/www/texnikum2son/deploy-update.sh
 ```
 
+## Admin panel (https://texnikum2son.com/admin/)
+
+Kod yozmasdan: qabulni ochish/yopish, aloqa ma'lumotlari, yangiliklar va galereyaga rasm/video yuklash. O'zgarishlar saytda darhol ko'rinadi. Ma'lumotlar serverdagi PocketBase'da saqlanadi (`/opt/texnikum-pb`), sayt ularni `/api` orqali o'qiydi. Server javob bermasa, sayt `src/data.js` dagi ma'lumotlar bilan ishlayveradi.
+
+**O'rnatish** (bir marta, serverda):
+```bash
+bash /var/www/texnikum2son/deploy-update.sh
+bash /var/www/texnikum2son/setup-admin.sh
+```
+Skript PocketBase'ni o'rnatadi, `texnikum-pb` xizmatini yoqadi, nginx'ga `/api` va `/_/` ni qo'shadi va admin email/parolini so'raydi.
+
+- Yana admin qo'shish yoki parolni almashtirish: `sudo -u pocketbase /opt/texnikum-pb/pocketbase superuser upsert EMAIL PAROL --dir=/opt/texnikum-pb/pb_data`
+- Zaxira nusxa: https://texnikum2son.com/_/ → Settings → Backups (yoki `/opt/texnikum-pb/pb_data` papkasini nusxalang)
+- Jadvallar tuzilishi: `server/pb_migrations/` (sayt yangilanganda serverga o'zi ko'chiriladi)
+- Holatini ko'rish: `systemctl status texnikum-pb`, jurnal: `journalctl -u texnikum-pb -n 50`
+
 ## Ma'lumotlarni o'zgartirish
 
 Barcha matnlar bitta faylda: **`src/data.js`**. Asosiy ma'lumotlar (nom, aloqa, 7 yo'nalish, xodimlar, ko'rsatkichlar) texnikum2son.com dan olingan. `TODO` bilan belgilangan joylarni haqiqiy ma'lumotlar bilan almashtiring:
@@ -68,6 +84,10 @@ index.html            sahifa tuzilishi (Tailwind klasslari)
 src/main.js           UI: panellar, belgilar, sayohat rejimi, animatsiyalar
 src/data.js           kontent (en/uz)
 src/i18n.js           til tanlash va interfeys matnlari
+src/content.js        admin paneldan keladigan jonli ma'lumotlar
+src/news.js           Yangiliklar bo'limi
+src/admin.js, admin/  admin panel sahifasi
+server/pb_migrations  admin panel jadvallari (PocketBase)
 src/scene/campus.js   3D sahna, kamera, yorug'lik, harakatlar
 src/scene/workshops.js har bir kasb ustaxonasi (3D)
 src/scene/kit.js      3D bloklar (box, daraxt, odam, yozuvlar)

@@ -2,9 +2,13 @@ import * as raw from './data.js';
 import { applyStatic, lang, LANGS, localize, setLang, t } from './i18n.js';
 import { icon } from './icons.js';
 import { media, mediaFor, openLightbox, renderGallery } from './gallery.js';
+import { applySettings } from './content.js';
+import { items as news, renderNews } from './news.js';
 
-// Barcha kontent tanlangan tilga aylantiriladi (src/i18n.js)
+// Barcha kontent tanlangan tilga aylantiriladi (src/i18n.js),
+// keyin admin paneldagi sozlamalar (qabul, aloqa) ustidan yoziladi
 const { dual, faqs, features, metrics, professions, site, stats, steps } = localize(raw);
+applySettings(site);
 
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -17,6 +21,7 @@ const fmt = (n) => n.toLocaleString('ru-RU').replace(/ /g, ' ');
 const nav = [
   ['#kasblar', t('navPrograms')],
   ['#afzalliklar', t('navWhy')],
+  ...(news.length ? [['#yangiliklar', t('navNews')]] : []),
   ...(media.length ? [['#galereya', t('navGallery')]] : []),
   ['#dual', t('navDual')],
   ['#qabul', t('navAdmission')],
@@ -467,5 +472,6 @@ function initReveal() {
 renderStatic();
 initInteractive();
 initReveal();
+renderNews(observeReveal);
 renderGallery(observeReveal);
 initCampus();

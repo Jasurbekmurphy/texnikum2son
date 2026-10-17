@@ -1,6 +1,7 @@
 import * as raw from './data.js';
 import { localize, t } from './i18n.js';
 import { icon } from './icons.js';
+import { fileUrl, gallery as uploaded, pick } from './content.js';
 
 // src/gallery/ ichidagi rasm va videolar build paytida avtomatik topiladi.
 // Papka nomi = bo'lim, fayl nomi = yozuv (batafsil: src/gallery/README.md).
@@ -20,25 +21,43 @@ const { professions, galleryText } = localize(raw);
 const byProf = new Map(professions.map((p) => [p.id, p]));
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
+// Papka (bo'lim) nomidan: filtr tugmasidagi qisqa nom (group) va rasm ustidagi to'liq nom (title)
+function describe(folder) {
+  const prof = byProf.get(folder);
+  const other = galleryText.folders[folder || 'kampus'] ?? cap(folder.replace(/[-_]+/g, ' '));
+  const group = prof ? (prof.label ?? prof.title) : other;
+  const title = prof ? prof.title : other;
+  return { folder, group, title, color: prof?.color, rank: prof ? professions.indexOf(prof) : 99 };
+}
+
 function parse(path) {
   const parts = path.replace('./gallery/', '').split('/');
   const file = parts.pop();
-  const folder = parts[0] ?? '';
+  const info = describe(parts[0] ?? '');
   const slug = file.replace(/\.[^.]+$/, '').replace(/[-_ ]*\d+$/, '');
   // Tarjima bo'lsa (src/data.js → galleryText), aks holda fayl nomining o'zi
   const caption = galleryText.captions[slug] ?? slug.replace(/[-_]+/g, ' ').trim();
-  const prof = byProf.get(folder);
-  const other = galleryText.folders[folder || 'kampus'] ?? cap(folder.replace(/[-_]+/g, ' '));
-  // group: filtr tugmasidagi qisqa nom, title: rasm ustidagi to'liq nom
-  const group = prof ? (prof.label ?? prof.title) : other;
-  const title = prof ? prof.title : other;
-  return { folder, group, title, color: prof?.color, rank: prof ? professions.indexOf(prof) : 99, caption: caption ? cap(caption) : title };
+  return { ...info, caption: caption ? cap(caption) : info.title };
 }
 
-export const media = [
+// Admin paneldan yuklangan rasm/videolar (yangilari birinchi)
+function fromAdmin(r) {
+  const info = describe(r.category);
+  const caption = pick(r, 'caption').replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
+  const base = { ...info, path: r.id, caption: caption ? cap(caption) : info.title };
+  return /\.(mp4|webm)$/i.test(r.file)
+    ? { ...base, type: 'video', src: fileUrl(r, r.file), w: r.width || 16, h: r.height || 9 }
+    : { ...base, type: 'img', thumb: fileUrl(r, r.file, '800x0'), full: fileUrl(r, r.file), w: r.width || 4, h: r.height || 3 };
+}
+
+const bundled = [
   ...Object.entries(thumbs).map(([path, t]) => ({ ...parse(path), path, type: 'img', thumb: t.src, w: t.w, h: t.h, full: fulls[path] })),
   ...Object.entries(videos).map(([path, src]) => ({ ...parse(path), path, type: 'video', src, w: 16, h: 9 })),
-].sort((a, b) => a.rank - b.rank || a.path.localeCompare(b.path, 'uz', { numeric: true }));
+].sort((a, b) => a.path.localeCompare(b.path, 'uz', { numeric: true }));
+
+export const media = [...(uploaded ?? []).map(fromAdmin), ...bundled]
+  .map((m, seq) => ({ ...m, seq }))
+  .sort((a, b) => a.rank - b.rank || a.seq - b.seq);
 
 export const mediaFor = (folder) => media.filter((m) => m.folder === folder);
 

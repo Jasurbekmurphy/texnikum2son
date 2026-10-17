@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="uz">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Admin panel · Paxtaobod 2-son texnikumi</title>
+    <link rel="icon" href="/icon-192.png" type="image/png" sizes="192x192" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body class="min-h-svh">
+    <!-- Kirish -->
+    <main id="login" class="grid min-h-svh place-items-center p-4" hidden>
+      <form class="w-full max-w-sm rounded-3xl bg-white p-7 shadow-xl ring-1 ring-slate-200" id="loginForm">
+        <img src="/icon-192.png" alt="" class="size-14 rounded-xl" width="56" height="56" />
+        <h1 class="mt-4 text-2xl font-extrabold tracking-tight">Admin panel</h1>
+        <p class="mt-1 text-sm text-slate-500">Paxtaobod 2-son texnikumi sayti</p>
+        <label class="field mt-6">Email<input name="email" type="email" autocomplete="username" required /></label>
+        <label class="field mt-3">Parol<input name="password" type="password" autocomplete="current-password" required /></label>
+        <p class="mt-3 text-sm font-medium text-red-600" id="loginError" hidden></p>
+        <button class="btn-primary mt-5 w-full">Kirish</button>
+      </form>
+    </main>
+
+    <!-- Panel -->
+    <div id="app" hidden>
+      <header class="sticky top-0 z-20 border-b border-slate-200 bg-white/90 backdrop-blur">
+        <div class="mx-auto flex max-w-5xl items-center gap-3 px-4 py-3">
+          <img src="/icon-192.png" alt="" class="size-9 rounded-lg ring-1 ring-slate-200" width="36" height="36" />
+          <p class="min-w-0 flex-1 truncate font-bold">Admin panel</p>
+          <a class="btn-ghost" href="/" target="_blank" rel="noopener">Saytni ochish</a>
+          <button class="btn-ghost" id="logout">Chiqish</button>
+        </div>
+        <nav class="no-scrollbar mx-auto flex max-w-5xl gap-2 overflow-x-auto px-4 pb-3" id="tabs">
+          <button class="gal-chip" data-tab="settings" aria-pressed="true">Qabul va aloqa</button>
+          <button class="gal-chip" data-tab="news" aria-pressed="false">Yangiliklar</button>
+          <button class="gal-chip" data-tab="gallery" aria-pressed="false">Galereya</button>
+        </nav>
+      </header>
+
+      <main class="mx-auto max-w-5xl px-4 py-6">
+        <!-- Qabul va aloqa -->
+        <section data-panel="settings">
+          <form id="settingsForm" class="space-y-5">
+            <div class="card">
+              <h2 class="card-title">Qabul</h2>
+              <label class="mt-4 flex items-center gap-3 font-semibold">
+                <input type="checkbox" name="admission_open" class="toggle" /> Qabul ochiq
+              </label>
+              <p class="mt-1 text-sm text-slate-500">O'chirilsa saytda "Qabul yopiq" deb ko'rinadi.</p>
+              <div class="mt-4 grid gap-3 sm:grid-cols-2">
+                <label class="field">Oxirgi kun (o'zbekcha)<input name="deadline_uz" placeholder="25-avgust" /></label>
+                <label class="field">Oxirgi kun (inglizcha)<input name="deadline_en" placeholder="August 25" /></label>
+                <label class="field sm:col-span-2">Hujjat topshirish havolasi<input name="apply_url" type="url" /></label>
+              </div>
+            </div>
+            <div class="card">
+              <h2 class="card-title">Aloqa</h2>
+              <div class="mt-4 grid gap-3 sm:grid-cols-2">
+                <label class="field">Telefon<input name="phone" /></label>
+                <label class="field">Email<input name="email" type="email" /></label>
+                <label class="field">Manzil (o'zbekcha)<input name="address_uz" /></label>
+                <label class="field">Manzil (inglizcha)<input name="address_en" /></label>
+                <label class="field">Ish vaqti (o'zbekcha)<input name="hours_uz" /></label>
+                <label class="field">Ish vaqti (inglizcha)<input name="hours_en" /></label>
+                <label class="field">Telegram havolasi<input name="telegram" type="url" /></label>
+                <label class="field">Instagram havolasi<input name="instagram" type="url" /></label>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <button class="btn-primary">Saqlash</button>
+              <span class="text-sm font-medium" data-status></span>
+            </div>
+          </form>
+        </section>
+
+        <!-- Yangiliklar -->
+        <section data-panel="news" hidden>
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <h2 class="text-xl font-extrabold">Yangiliklar</h2>
+            <button class="btn-primary" id="newsAdd">+ Yangilik qo'shish</button>
+          </div>
+          <div class="mt-4 space-y-3" id="newsList"></div>
+        </section>
+
+        <!-- Galereya -->
+        <section data-panel="gallery" hidden>
+          <form class="card" id="uploadForm">
+            <h2 class="card-title">Rasm yoki video yuklash</h2>
+            <div class="mt-4 grid gap-3 sm:grid-cols-2">
+              <label class="field">Bo'lim<select name="category" id="categorySelect" required></select></label>
+              <label class="field">Fayllar (bir nechtasini tanlash mumkin)<input name="files" type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm" multiple required /></label>
+              <label class="field">Yozuv (o'zbekcha, ixtiyoriy)<input name="caption_uz" /></label>
+              <label class="field">Yozuv (inglizcha, ixtiyoriy)<input name="caption_en" /></label>
+            </div>
+            <p class="mt-2 text-sm text-slate-500">Rasm 15 MB, video 50 MB gacha. Video 5–15 soniya, ovozsiz bo'lsa yaxshi.</p>
+            <div class="mt-4 flex items-center gap-3">
+              <button class="btn-primary">Yuklash</button>
+              <span class="text-sm font-medium" data-status></span>
+            </div>
+          </form>
+          <p class="mt-6 text-sm text-slate-500">Yuklangan fayllar. Saytga build bilan qo'shilgan eski rasmlar bu yerda ko'rinmaydi.</p>
+          <div class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4" id="galleryList"></div>
+        </section>
+      </main>
+    </div>
+
+    <!-- Yangilik tahrirlash oynasi -->
+    <dialog class="news-box" id="newsDialog">
+      <form class="mx-auto my-6 w-[min(720px,calc(100%-24px))] rounded-3xl bg-white p-6 shadow-2xl sm:p-8" id="newsForm">
+        <div class="flex items-center justify-between gap-3">
+          <h2 class="text-xl font-extrabold" data-title>Yangilik</h2>
+          <button type="button" class="ctrl" data-close aria-label="Yopish">✕</button>
+        </div>
+        <div class="mt-5 grid gap-3 sm:grid-cols-2">
+          <label class="field sm:col-span-2">Sarlavha (o'zbekcha)*<input name="title_uz" required /></label>
+          <label class="field sm:col-span-2">Sarlavha (inglizcha)<input name="title_en" /></label>
+          <label class="field sm:col-span-2">Matn (o'zbekcha)<textarea name="body_uz" rows="6"></textarea></label>
+          <label class="field sm:col-span-2">Matn (inglizcha)<textarea name="body_en" rows="6"></textarea></label>
+          <label class="field">Sana<input name="date" type="date" required /></label>
+          <label class="field">Rasm<input name="image" type="file" accept="image/jpeg,image/png,image/webp" /></label>
+          <div class="sm:col-span-2" data-current-image></div>
+          <label class="flex items-center gap-3 font-semibold sm:col-span-2"><input type="checkbox" name="published" class="toggle" checked /> Saytda ko'rsatish</label>
+        </div>
+        <p class="mt-3 text-sm text-slate-500">Inglizcha matn bo'sh qolsa, inglizcha sahifada o'zbekchasi ko'rinadi.</p>
+        <div class="mt-5 flex items-center gap-3">
+          <button class="btn-primary">Saqlash</button>
+          <span class="text-sm font-medium" data-status></span>
+        </div>
+      </form>
+    </dialog>
+
+    <script type="module" src="/src/admin.js"></script>
+  </body>
+</html>
