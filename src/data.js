@@ -281,11 +281,6 @@ export const faqs = [
     },
   },
   {
-    // TODO
-    q: { en: 'Is there a dormitory?', uz: 'Yotoqxona bormi?' },
-    a: { en: 'Yes, there is a dormitory for students from other regions.', uz: "Ha, boshqa hududlardan kelgan o'quvchilar uchun yotoqxona mavjud." },
-  },
-  {
     q: { en: 'Can I go to university after graduating?', uz: 'Bitirgandan keyin oliygohga kirsa bo‘ladimi?' },
     a: { en: 'Yes, with the diploma you can apply to universities.', uz: "Ha, diplom bilan oliy ta'lim muassasalariga hujjat topshirish mumkin." },
   },
