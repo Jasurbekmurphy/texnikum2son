@@ -37,7 +37,7 @@ function renderStatic() {
     const b = e.target.closest('[data-lang]');
     if (b) setLang(b.dataset.lang);
   });
-  const brand = `<img src="/favicon.svg" alt="" class="size-9 shrink-0 rounded-lg ring-1 ring-slate-200" width="36" height="36" /><span class="truncate">${site.shortName}</span>`;
+  const brand = `<img src="/icon-192.png" alt="" class="size-9 shrink-0 rounded-lg bg-white ring-1 ring-slate-200" width="36" height="36" /><span class="truncate">${site.shortName}</span>`;
   $('[data-slot=brand]').innerHTML = brand;
   $$('[data-slot=apply]').forEach((a) => Object.assign(a, { href: site.admission.applyUrl, target: '_blank', rel: 'noopener' }));
 
