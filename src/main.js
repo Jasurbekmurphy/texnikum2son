@@ -1,5 +1,5 @@
 import * as raw from './data.js';
-import { applyStatic, lang, LANGS, localize, setLang, t } from './i18n.js';
+import { applyStatic, lang, LANGS, langUrl, localize, setLang, t } from './i18n.js';
 import { icon } from './icons.js';
 import { media, mediaFor, openLightbox, renderGallery } from './gallery.js';
 import { applySettings, mapSrc, withTexts } from './content.js';
@@ -32,7 +32,7 @@ const nav = [
 // EN | UZ almashtirgich
 const langSwitch = () =>
   `<div class="lang-switch" role="group" aria-label="${t('language')}">${LANGS.map(
-    (l) => `<button type="button" data-lang="${l}" aria-pressed="${l === lang}">${l.toUpperCase()}</button>`,
+    (l) => `<a href="${langUrl(l)}" hreflang="${l}" data-lang="${l}" aria-pressed="${l === lang}">${l.toUpperCase()}</a>`,
   ).join('')}</div>`;
 
 function renderStatic() {
@@ -40,7 +40,10 @@ function renderStatic() {
   $$('[data-slot=lang]').forEach((el) => (el.innerHTML = langSwitch()));
   document.addEventListener('click', (e) => {
     const b = e.target.closest('[data-lang]');
-    if (b) setLang(b.dataset.lang);
+    if (b && !e.metaKey && !e.ctrlKey) {
+      e.preventDefault();
+      setLang(b.dataset.lang);
+    }
   });
   const brand = `<img src="/icon-192.png" alt="" class="size-9 shrink-0 rounded-lg bg-white ring-1 ring-slate-200" width="36" height="36" /><span class="truncate" data-edit="site.shortName">${site.shortName}</span>`;
   $('[data-slot=brand]').innerHTML = brand;

@@ -1,7 +1,7 @@
-// Saytda bosib tahrirlash rejimi: /?edit=1 (admin panelga kirilgan brauzerda).
+// Saytda bosib tahrirlash rejimi: /?edit=1 yoki /uz/?edit=1 (admin panelga kirilgan brauzerda).
 // Belgilangan matnlar ([data-edit] va index.html dagi [data-i18n]) joyida o'zgartiriladi
 // va serverdagi "texts" jadvaliga tanlangan til uchun yoziladi.
-import { lang, LANGS } from './i18n.js';
+import { lang, LANGS, langUrl } from './i18n.js';
 import { translate } from './translate.js';
 
 const API = '/api';
@@ -81,7 +81,7 @@ export async function startEditor() {
       <span class="hidden text-slate-300 xl:inline">Matnni bosib o'zgartiring. [qavs] ichidagi so'z ko'k chiqadi, bo'sh qoldirilsa asl matn qaytadi.</span>
       <span class="text-sky-300">${esc(msg)}</span>
       <label class="flex items-center gap-1.5"><input type="checkbox" class="accent-sky-400" data-auto ${auto ? 'checked' : ''} />${other.toUpperCase()} ga avto-tarjima</label>
-      <a class="edit-btn" href="?edit=1&lang=${other}">${other.toUpperCase()} tilida</a>
+      <a class="edit-btn" href="${langUrl(other)}" data-lang="${other}">${other.toUpperCase()} tilida</a>
       <button class="edit-btn primary" data-save ${changes.size ? '' : 'disabled'}>Saqlash${changes.size ? ` (${changes.size})` : ''}</button>
       <a class="edit-btn" href="${exitUrl}">Chiqish</a>`);
   render();

@@ -133,10 +133,10 @@ details[open] .chev {
 .lang-switch {
   @apply flex rounded-lg bg-slate-100 p-0.5 text-xs font-bold;
 }
-.lang-switch button {
+.lang-switch a {
   @apply rounded-md px-2 py-1.5 text-slate-500 transition hover:text-ink;
 }
-.lang-switch button[aria-pressed='true'] {
+.lang-switch a[aria-pressed='true'] {
   @apply bg-white text-brand-600 shadow-sm;
 }
 .gal-chip {

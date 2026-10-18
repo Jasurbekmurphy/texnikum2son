@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /_/
+
+Sitemap: https://texnikum2son.com/sitemap.xml
