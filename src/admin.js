@@ -28,6 +28,20 @@ async function api(path, { method = 'GET', body } = {}) {
   return data;
 }
 
+// Inglizchasi bo'sh maydonlarni o'zbekchasidan tarjima qiladi (serverdagi /api/translate).
+// fields: ['title', 'body'] → title_uz → title_en. Tarjima ishlamasa, false qaytaradi.
+async function fillEnglish(get, set, fields) {
+  const todo = fields.filter((f) => !get(`${f}_en`)?.trim() && get(`${f}_uz`)?.trim());
+  if (!todo.length) return true;
+  try {
+    const { texts } = await api('/translate', { method: 'POST', body: { from: 'uz', to: 'en', texts: todo.map((f) => get(`${f}_uz`)) } });
+    todo.forEach((f, i) => set(`${f}_en`, texts[i]));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 const records = (name, query = '') => api(`/collections/${name}/records?perPage=500${query}`).then((d) => d.items);
 
 function status(form, text, ok = true) {
@@ -108,8 +122,9 @@ $('#settingsForm').addEventListener('submit', (e) => {
   busy(form, async () => {
     const body = {};
     for (const el of form.elements) if (el.name) body[el.name] = el.type === 'checkbox' ? el.checked : el.value.trim();
+    const translated = await fillEnglish((k) => body[k], (k, v) => (body[k] = form.elements[k].value = v), ['deadline', 'address', 'hours']);
     await api(`/collections/settings/records/${settingsId}`, { method: 'PATCH', body });
-    status(form, 'Saqlandi. Saytda darhol ko‘rinadi.');
+    status(form, translated ? 'Saqlandi. Saytda darhol ko‘rinadi.' : 'Saqlandi, lekin inglizchaga tarjima ishlamadi.', translated);
   });
 });
 
@@ -170,13 +185,20 @@ newsForm.addEventListener('submit', (e) => {
   e.preventDefault();
   busy(newsForm, async () => {
     const f = new FormData(newsForm);
+    f.delete('translate');
     f.set('published', newsForm.elements.published.checked);
+    const translated = !newsForm.elements.translate.checked || (await fillEnglish((k) => f.get(k), (k, v) => f.set(k, v), ['title', 'body']));
     f.set('date', `${f.get('date')} 12:00:00.000Z`);
     if (!f.get('image')?.size) f.delete('image');
     await api(editing ? `/collections/news/records/${editing.id}` : '/collections/news/records', {
       method: editing ? 'PATCH' : 'POST',
       body: f,
     });
+    if (!translated) {
+      status(newsForm, 'Saqlandi, lekin inglizchaga tarjima ishlamadi. Inglizchasini qo‘lda yozishingiz mumkin.', false);
+      editing = null;
+      return loadNews();
+    }
     dialog.close();
     loadNews();
   });
@@ -258,14 +280,16 @@ $('#uploadForm').addEventListener('submit', (e) => {
   const form = e.target;
   busy(form, async () => {
     const files = [...form.elements.files.files];
+    const caption = { caption_uz: form.elements.caption_uz.value.trim(), caption_en: form.elements.caption_en.value.trim() };
+    await fillEnglish((k) => caption[k], (k, v) => (caption[k] = form.elements[k].value = v), ['caption']);
     for (const [i, file] of files.entries()) {
       status(form, `Yuklanmoqda: ${i + 1} / ${files.length}`);
       const size = await measure(file);
       const f = new FormData();
       f.set('file', file);
       f.set('category', form.elements.category.value);
-      f.set('caption_uz', form.elements.caption_uz.value.trim());
-      f.set('caption_en', form.elements.caption_en.value.trim());
+      f.set('caption_uz', caption.caption_uz);
+      f.set('caption_en', caption.caption_en);
       f.set('width', size.width);
       f.set('height', size.height);
       f.set('published', true);

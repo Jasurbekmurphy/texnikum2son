@@ -30,8 +30,11 @@ if ! "$PB_DIR/pocketbase" --version 2>/dev/null | grep -q "$PB_VERSION"; then
   unzip -q -o "$tmp/pb.zip" pocketbase -d "$PB_DIR"
   rm -rf "$tmp"
 fi
-rm -rf "$PB_DIR/pb_migrations"
-cp -r "$SITE/.server/pb_migrations" "$PB_DIR/"
+rm -rf "$PB_DIR/pb_migrations" "$PB_DIR/pb_hooks"
+cp -r "$SITE/.server/pb_migrations" "$SITE/.server/pb_hooks" "$PB_DIR/"
+# Tarjima uchun Google Cloud kaliti (ixtiyoriy): GOOGLE_TRANSLATE_KEY=...
+[ -f "$PB_DIR/.env" ] || echo "# GOOGLE_TRANSLATE_KEY=" > "$PB_DIR/.env"
+chmod 600 "$PB_DIR/.env"
 chown -R pocketbase: "$PB_DIR"
 
 echo "3/5 Xizmat (systemd) sozlanmoqda..."
@@ -43,7 +46,8 @@ After=network.target
 [Service]
 User=pocketbase
 Group=pocketbase
-ExecStart=$PB_DIR/pocketbase serve --http=127.0.0.1:$PORT --dir=$PB_DIR/pb_data --migrationsDir=$PB_DIR/pb_migrations --automigrate=false
+EnvironmentFile=-$PB_DIR/.env
+ExecStart=$PB_DIR/pocketbase serve --http=127.0.0.1:$PORT --dir=$PB_DIR/pb_data --migrationsDir=$PB_DIR/pb_migrations --hooksDir=$PB_DIR/pb_hooks --automigrate=false
 Restart=always
 RestartSec=3
 LimitNOFILE=4096

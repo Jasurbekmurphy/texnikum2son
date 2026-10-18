@@ -73,10 +73,13 @@ export async function startEditor() {
   });
 
   const other = LANGS.find((l) => l !== lang);
+  // O'zbekchada yozilgani inglizchaga avtomatik tarjima qilinadi (xohlasa o'chiriladi)
+  let auto = lang === 'uz';
   const render = (msg = '') =>
     bar(`<span class="font-bold">✏️ Tahrirlash · ${lang.toUpperCase()}</span>
       <span class="hidden text-slate-300 xl:inline">Matnni bosib o'zgartiring. [qavs] ichidagi so'z ko'k chiqadi, bo'sh qoldirilsa asl matn qaytadi.</span>
       <span class="text-sky-300">${esc(msg)}</span>
+      <label class="flex items-center gap-1.5"><input type="checkbox" class="accent-sky-400" data-auto ${auto ? 'checked' : ''} />${other.toUpperCase()} ga avto-tarjima</label>
       <a class="edit-btn" href="?edit=1&lang=${other}">${other.toUpperCase()} tilida</a>
       <button class="edit-btn primary" data-save ${changes.size ? '' : 'disabled'}>Saqlash${changes.size ? ` (${changes.size})` : ''}</button>
       <a class="edit-btn" href="${exitUrl}">Chiqish</a>`);
@@ -112,6 +115,9 @@ export async function startEditor() {
   });
   addEventListener('beforeunload', (e) => changes.size && e.preventDefault());
 
+  document.addEventListener('change', (e) => {
+    if (e.target.matches('.edit-bar [data-auto]')) auto = e.target.checked;
+  });
   document.addEventListener('click', async (e) => {
     if (!e.target.closest('.edit-bar [data-save]')) return;
     render('Saqlanmoqda...');
@@ -125,14 +131,27 @@ export async function startEditor() {
         if (!res.ok) throw new Error((await res.json().catch(() => ({}))).message || `Xato ${res.status}`);
         return res.json();
       };
+      const list = [...changes];
+      let translated = null;
+      if (auto) {
+        render('Tarjima qilinmoqda...');
+        translated = await api('/translate', 'POST', { from: lang, to: other, texts: list.map(([, v]) => v) })
+          .then((r) => r.texts)
+          .catch(() => null);
+      }
       const existing = new Map((await api('/collections/texts/records?perPage=1000&fields=id,key', 'GET')).items.map((r) => [r.key, r.id]));
-      for (const [key, value] of changes) {
+      for (const [i, [key, value]] of list.entries()) {
+        const body = { [lang]: value };
+        if (translated) body[other] = translated[i];
         const id = existing.get(key);
-        if (id) await api(`/collections/texts/records/${id}`, 'PATCH', { [lang]: value });
-        else await api('/collections/texts/records', 'POST', { key, [lang]: value });
+        if (id) await api(`/collections/texts/records/${id}`, 'PATCH', body);
+        else await api('/collections/texts/records', 'POST', { key, ...body });
       }
       changes.clear();
-      location.reload();
+      if (auto && !translated) {
+        render(`Saqlandi, lekin ${other.toUpperCase()} ga tarjima ishlamadi`);
+        setTimeout(() => location.reload(), 3000);
+      } else location.reload();
     } catch (err) {
       render(err.message);
     }

@@ -56,7 +56,8 @@ Skript PocketBase'ni o'rnatadi, `texnikum-pb` xizmatini yoqadi, nginx'ga `/api` 
 
 - Yana admin qo'shish yoki parolni almashtirish: `sudo -u pocketbase /opt/texnikum-pb/pocketbase superuser upsert EMAIL PAROL --dir=/opt/texnikum-pb/pb_data`
 - Zaxira nusxa: https://texnikum2son.com/_/ → Settings → Backups (yoki `/opt/texnikum-pb/pb_data` papkasini nusxalang)
-- Jadvallar tuzilishi: `server/pb_migrations/` (sayt yangilanganda serverga o'zi ko'chiriladi)
+- Jadvallar tuzilishi: `server/pb_migrations/`, server kodi (tarjima): `server/pb_hooks/` (sayt yangilanganda serverga o'zi ko'chiriladi)
+- Avto-tarjima (o'zbekcha → inglizcha) bepul Google Translate orqali ishlaydi. U ishlamay qolsa, Google Cloud Translation kalitini `/opt/texnikum-pb/.env` ga `GOOGLE_TRANSLATE_KEY=...` qilib yozing va `systemctl restart texnikum-pb` qiling
 - Holatini ko'rish: `systemctl status texnikum-pb`, jurnal: `journalctl -u texnikum-pb -n 50`
 
 ## Ma'lumotlarni o'zgartirish

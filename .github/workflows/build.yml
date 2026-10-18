@@ -25,7 +25,7 @@ jobs:
         run: |
           cp deploy/update.sh dist/deploy-update.sh
           cp deploy/setup-admin.sh dist/setup-admin.sh
-          mkdir -p dist/.server && cp -r server/pb_migrations dist/.server/
+          mkdir -p dist/.server && cp -r server/pb_migrations server/pb_hooks dist/.server/
           cd dist
           git init -q -b dist
           git config user.name "github-actions[bot]"

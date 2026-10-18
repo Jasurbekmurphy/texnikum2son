@@ -7,12 +7,20 @@ git fetch --depth 1 origin dist
 git reset --hard origin/dist
 echo "Sayt yangilandi: $(git log -1 --format='%h %cd' --date=format:'%Y-%m-%d %H:%M')"
 
-# Admin panel o'rnatilgan bo'lsa, uning jadvallarini ham yangilaymiz
+# Admin panel o'rnatilgan bo'lsa, uning jadvallari va server kodini ham yangilaymiz
 PB_DIR=/opt/texnikum-pb
-if [ -d "$PB_DIR" ] && ! diff -rq .server/pb_migrations "$PB_DIR/pb_migrations" >/dev/null 2>&1; then
-  rm -rf "$PB_DIR/pb_migrations"
-  cp -r .server/pb_migrations "$PB_DIR/"
-  chown -R pocketbase: "$PB_DIR/pb_migrations"
-  systemctl restart texnikum-pb
-  echo "Admin panel jadvallari yangilandi"
+if [ -d "$PB_DIR" ]; then
+  changed=0
+  for d in pb_migrations pb_hooks; do
+    if [ -d ".server/$d" ] && ! diff -rq ".server/$d" "$PB_DIR/$d" >/dev/null 2>&1; then
+      rm -rf "${PB_DIR:?}/$d"
+      cp -r ".server/$d" "$PB_DIR/"
+      chown -R pocketbase: "$PB_DIR/$d"
+      changed=1
+    fi
+  done
+  if [ "$changed" = 1 ]; then
+    systemctl restart texnikum-pb
+    echo "Admin panel yangilandi"
+  fi
 fi
