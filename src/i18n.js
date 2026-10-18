@@ -127,11 +127,17 @@ const UI = {
 };
 
 // t('key') yoki t('key', arg) — funksiyali matnlar uchun argument beriladi
+// Saytda tahrirlangan matnlar (src/content.js beradi). [matn] → ko'k rangda ajratilgan
+let custom = {};
+export const setCustom = (map) => (custom = map);
+export const highlight = (s) => s.replace(/\[([^\]]+)\]/g, '<span class="text-brand-600">$1</span>');
+
 export function t(key, ...args) {
   const v = UI[key];
   if (!v) return key;
   const s = v[lang] ?? v[DEFAULT_LANG];
-  return typeof s === 'function' ? s(...args) : s;
+  if (typeof s === 'function') return s(...args);
+  return custom[key] ? highlight(custom[key]) : s;
 }
 
 // index.html dagi data-i18n / data-i18n-aria / data-i18n-content belgilarini to'ldiradi

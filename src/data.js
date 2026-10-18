@@ -19,8 +19,9 @@ export const site = {
   workHours: { en: 'Mon–Fri, 08:30–17:00', uz: 'Dush–Juma, 08:30–17:00' }, // TODO: tekshiring
   telegram: 'https://t.me/texnikum2son',
   instagram: 'https://www.instagram.com/paxtaobod_2son_texnikumi',
-  // Google Maps → Ulashish → Xaritani joylashtirish → src manzili
-  mapEmbed: '', // TODO
+  // Xarita: koordinata ("40.9310, 72.4970"), Google Maps havolasi, joylashtirish (<iframe>) kodi
+  // yoki qidiruv matni. Admin paneldan ham o'zgartiriladi.
+  map: 'Paxtaobod tumani 2-son texnikumi, Andijon viloyati',
   admission: {
     open: false, // qabul ochilganda: true
     deadline: { en: 'August 25', uz: '25-avgust' }, // TODO: tekshiring

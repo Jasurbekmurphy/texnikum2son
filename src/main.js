@@ -2,12 +2,12 @@ import * as raw from './data.js';
 import { applyStatic, lang, LANGS, localize, setLang, t } from './i18n.js';
 import { icon } from './icons.js';
 import { media, mediaFor, openLightbox, renderGallery } from './gallery.js';
-import { applySettings } from './content.js';
+import { applySettings, mapSrc, withTexts } from './content.js';
 import { items as news, renderNews } from './news.js';
 
 // Barcha kontent tanlangan tilga aylantiriladi (src/i18n.js),
 // keyin admin paneldagi sozlamalar (qabul, aloqa) ustidan yoziladi
-const { dual, faqs, features, metrics, professions, site, stats, steps } = localize(raw);
+const { dual, faqs, features, metrics, professions, site, stats, steps } = withTexts(localize(raw));
 applySettings(site);
 
 const $ = (s, el = document) => el.querySelector(s);
@@ -42,7 +42,7 @@ function renderStatic() {
     const b = e.target.closest('[data-lang]');
     if (b) setLang(b.dataset.lang);
   });
-  const brand = `<img src="/icon-192.png" alt="" class="size-9 shrink-0 rounded-lg bg-white ring-1 ring-slate-200" width="36" height="36" /><span class="truncate">${site.shortName}</span>`;
+  const brand = `<img src="/icon-192.png" alt="" class="size-9 shrink-0 rounded-lg bg-white ring-1 ring-slate-200" width="36" height="36" /><span class="truncate" data-edit="site.shortName">${site.shortName}</span>`;
   $('[data-slot=brand]').innerHTML = brand;
   $$('[data-slot=apply]').forEach((a) => Object.assign(a, { href: site.admission.applyUrl, target: '_blank', rel: 'noopener' }));
 
@@ -69,13 +69,14 @@ function renderStatic() {
     badge.classList.replace('text-emerald-700', 'text-slate-600');
   }
   $('#introEyebrow').textContent = open ? t('openUntil', site.admission.deadline) : site.slogan;
+  if (!open) $('#introEyebrow').dataset.edit = 'site.slogan';
 
   $('#heroStats').innerHTML = stats
     .slice(0, 3)
     .map(
-      (s) => `<div class="rounded-xl bg-white p-3 ring-1 ring-slate-100">
-        <p class="text-[11px] font-medium text-slate-500">${s.label}</p>
-        <p class="mt-0.5 text-lg font-extrabold">${fmt(s.value)}${s.suffix}</p>
+      (s, i) => `<div class="rounded-xl bg-white p-3 ring-1 ring-slate-100">
+        <p class="text-[11px] font-medium text-slate-500" data-edit="stats.${i}.label">${s.label}</p>
+        <p class="mt-0.5 text-lg font-extrabold"><span data-edit="stats.${i}.value">${fmt(s.value)}</span>${s.suffix}</p>
       </div>`,
     )
     .join('');
@@ -83,9 +84,9 @@ function renderStatic() {
   $('#stats').innerHTML = stats
     .map(
       (s, i) => `<div class="reveal bg-white px-5 py-8 text-center" style="--d:${i * 80}ms">
-        <p class="text-4xl font-extrabold tracking-tight text-brand-600 sm:text-5xl"><span data-count="${s.value}">0</span>${s.suffix}</p>
-        <p class="mt-1 font-semibold">${s.label}</p>
-        <p class="text-sm text-slate-500">${s.note}</p>
+        <p class="text-4xl font-extrabold tracking-tight text-brand-600 sm:text-5xl"><span data-count="${s.value}" data-edit="stats.${i}.value">0</span>${s.suffix}</p>
+        <p class="mt-1 font-semibold" data-edit="stats.${i}.label">${s.label}</p>
+        <p class="text-sm text-slate-500" data-edit="stats.${i}.note">${s.note}</p>
       </div>`,
     )
     .join('');
@@ -95,8 +96,8 @@ function renderStatic() {
       (p, i) => `<article class="reveal group relative flex flex-col overflow-hidden rounded-3xl bg-white p-6 ring-1 ring-slate-100 transition hover:-translate-y-1 hover:shadow-xl hover:shadow-brand-600/10" style="--d:${(i % 3) * 90}ms">
         <div class="absolute -top-16 -right-16 size-40 rounded-full opacity-10 transition group-hover:scale-125" style="background:${p.color}"></div>
         <div class="grid size-12 place-items-center rounded-2xl text-white shadow-lg" style="background:${p.color};box-shadow:0 10px 24px -10px ${p.color}">${icon(p.prop, 'size-6')}</div>
-        <h3 class="mt-5 text-xl font-bold">${p.title}</h3>
-        <p class="mt-2 flex-1 text-[15px] leading-relaxed text-slate-600">${p.desc}</p>
+        <h3 class="mt-5 text-xl font-bold" data-edit="professions.${i}.title">${p.title}</h3>
+        <p class="mt-2 flex-1 text-[15px] leading-relaxed text-slate-600" data-edit="professions.${i}.desc">${p.desc}</p>
         <div class="mt-5 flex flex-wrap gap-1.5 text-xs font-semibold">
           ${[p.duration, p.form, p.seats && t('seatsTag', p.seats)]
             .filter(Boolean)
@@ -114,8 +115,8 @@ function renderStatic() {
     .map(
       (f, i) => `<div class="reveal rounded-3xl bg-white/5 p-6 ring-1 ring-white/10 transition hover:bg-white/10" style="--d:${(i % 3) * 90}ms">
         <div class="grid size-11 place-items-center rounded-xl bg-brand-500/20 text-sky-300">${icon(f.icon)}</div>
-        <h3 class="mt-4 text-lg font-bold">${f.title}</h3>
-        <p class="mt-1.5 text-slate-300">${f.text}</p>
+        <h3 class="mt-4 text-lg font-bold" data-edit="features.${i}.title">${f.title}</h3>
+        <p class="mt-1.5 text-slate-300" data-edit="features.${i}.text">${f.text}</p>
       </div>`,
     )
     .join('');
@@ -124,16 +125,16 @@ function renderStatic() {
     .map(
       (d, i) => `<li class="reveal rounded-2xl bg-white p-5 ring-1 ring-slate-100" style="--d:${i * 80}ms">
         <span class="grid size-9 place-items-center rounded-full bg-brand-50 text-sm font-bold text-brand-600">${i + 1}</span>
-        <h3 class="mt-3 font-bold">${d.title}</h3>
-        <p class="mt-1 text-sm text-slate-600">${d.text}</p>
+        <h3 class="mt-3 font-bold" data-edit="dual.${i}.title">${d.title}</h3>
+        <p class="mt-1 text-sm text-slate-600" data-edit="dual.${i}.text">${d.text}</p>
       </li>`,
     )
     .join('');
 
   $('#metrics').innerHTML = metrics
     .map(
-      (m) => `<div>
-        <div class="flex justify-between gap-4 text-sm font-semibold"><span>${m.label}</span><span class="tabular-nums text-brand-600">${m.value}%</span></div>
+      (m, i) => `<div>
+        <div class="flex justify-between gap-4 text-sm font-semibold"><span data-edit="metrics.${i}.label">${m.label}</span><span class="tabular-nums text-brand-600">${m.value}%</span></div>
         <div class="mt-2 h-2 overflow-hidden rounded-full bg-brand-50"><div class="meter h-full rounded-full bg-brand-600" style="--w:${m.value}%"></div></div>
       </div>`,
     )
@@ -145,9 +146,9 @@ function renderStatic() {
         ${i < steps.length - 1 ? '<span class="absolute top-10 bottom-[-24px] left-5 w-0.5 bg-brand-100 lg:top-5 lg:right-[-50%] lg:bottom-auto lg:left-1/2 lg:h-0.5 lg:w-auto"></span>' : ''}
         <span class="relative grid size-10 shrink-0 place-items-center rounded-full bg-brand-600 font-bold text-white ring-4 ring-brand-100">${i + 1}</span>
         <div>
-          <p class="text-xs font-semibold text-brand-600">${s.time}</p>
-          <h3 class="font-bold">${s.title}</h3>
-          <p class="mt-1 text-sm text-slate-600">${s.text}</p>
+          <p class="text-xs font-semibold text-brand-600" data-edit="steps.${i}.time">${s.time}</p>
+          <h3 class="font-bold" data-edit="steps.${i}.title">${s.title}</h3>
+          <p class="mt-1 text-sm text-slate-600" data-edit="steps.${i}.text">${s.text}</p>
         </div>
       </li>`,
     )
@@ -156,9 +157,9 @@ function renderStatic() {
   $('#faq').innerHTML = faqs
     .map(
       (f, i) => `<details class="reveal group rounded-2xl bg-white p-5 ring-1 ring-slate-100 open:ring-brand-500/40" style="--d:${i * 60}ms">
-        <summary class="flex cursor-pointer list-none items-center justify-between gap-4 font-semibold">${f.q}
+        <summary class="flex cursor-pointer list-none items-center justify-between gap-4 font-semibold"><span data-edit="faqs.${i}.q">${f.q}</span>
           <span class="chev text-slate-400 transition">${icon('down')}</span></summary>
-        <p class="mt-3 text-slate-600">${f.a}</p>
+        <p class="mt-3 text-slate-600" data-edit="faqs.${i}.a">${f.a}</p>
       </details>`,
     )
     .join('');
@@ -184,11 +185,11 @@ function renderStatic() {
   ]
     .map(([ic, name, h]) => `<a class="btn bg-white/15 text-white hover:bg-white/25" href="${h}" target="_blank" rel="noopener">${icon(ic, 'size-4')}${name}</a>`)
     .join('');
-  $('#map').innerHTML = site.mapEmbed
-    ? `<iframe class="size-full min-h-[280px]" src="${site.mapEmbed}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="${t('map')}"></iframe>`
+  $('#map').innerHTML = site.map
+    ? `<iframe class="size-full min-h-[280px]" src="${mapSrc(site.map).replace(/"/g, '&quot;')}" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="${t('map')}"></iframe>`
     : `<div class="grid size-full min-h-[280px] place-items-center text-center text-brand-100"><div>${icon('pin', 'mx-auto size-10')}<p class="mt-2 px-6">${site.address}</p></div></div>`;
 
-  $('#footer').innerHTML = `<p>© ${new Date().getFullYear()} ${site.fullName}</p><p>${site.domain}</p>`;
+  $('#footer').innerHTML = `<p>© ${new Date().getFullYear()} <span data-edit="site.fullName">${site.fullName}</span></p><p>${site.domain}</p>`;
 }
 
 // ---------------- Interaktiv qism ----------------
@@ -268,8 +269,8 @@ function renderDetail(p) {
       <div class="grid size-12 shrink-0 place-items-center rounded-2xl text-white shadow-lg" style="background:${p.color}">${icon(p.prop, 'size-6')}</div>
       <div class="min-w-0 flex-1">
         <p class="text-[11px] font-bold tracking-widest uppercase" style="color:${p.color}">${t('program')} · ${String(i + 1).padStart(2, '0')}/${String(professions.length).padStart(2, '0')}</p>
-        <h2 class="text-lg leading-tight font-extrabold">${p.title}</h2>
-        <p class="text-sm text-slate-500">${p.short}</p>
+        <h2 class="text-lg leading-tight font-extrabold" data-edit="professions.${i}.title">${p.title}</h2>
+        <p class="text-sm text-slate-500" data-edit="professions.${i}.short">${p.short}</p>
       </div>
       <div class="flex gap-1">
         <button class="ctrl size-8 ring-1 ring-slate-200 sm:size-9" data-nav="-1" aria-label="${t('prev')}">${icon('left', 'size-4')}</button>
@@ -281,13 +282,13 @@ function renderDetail(p) {
       <span class="rounded-md px-2 py-1 ${site.admission.open ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'}">${site.admission.open ? t('admissionOpen') : t('admissionClosed')}</span>
       <span class="text-slate-500">${[p.duration, p.form].filter(Boolean).join(' · ')}</span>
     </div>
-    <p class="mt-3 text-[15px] leading-relaxed text-slate-600">${p.desc}</p>
+    <p class="mt-3 text-[15px] leading-relaxed text-slate-600" data-edit="professions.${i}.desc">${p.desc}</p>
     <div class="mt-3">${p.duration ? row(t('duration'), p.duration) : ''}${row(t('studyMode'), p.form)}${p.seats ? row(t('places'), t('placesValue', p.seats)) : ''}</div>
     ${photoStrip(p)}
     <p class="mt-4 text-xs font-bold tracking-wider text-slate-400 uppercase">${t('youLearn')}</p>
-    <div class="mt-2 flex flex-wrap gap-1.5">${p.skills.map((s) => `<span class="rounded-lg px-2.5 py-1 text-xs font-semibold" style="background:${p.color}14;color:${p.color}">${s}</span>`).join('')}</div>
+    <div class="mt-2 flex flex-wrap gap-1.5">${p.skills.map((s, j) => `<span class="rounded-lg px-2.5 py-1 text-xs font-semibold" style="background:${p.color}14;color:${p.color}" data-edit="professions.${i}.skills.${j}">${s}</span>`).join('')}</div>
     <p class="mt-4 text-xs font-bold tracking-wider text-slate-400 uppercase">${t('careers')}</p>
-    <ul class="mt-2 space-y-1.5 text-sm">${p.careers.map((c) => `<li class="flex items-center gap-2"><span class="text-emerald-500">${icon('check', 'size-4')}</span>${c}</li>`).join('')}</ul>
+    <ul class="mt-2 space-y-1.5 text-sm">${p.careers.map((c, j) => `<li class="flex items-center gap-2"><span class="text-emerald-500">${icon('check', 'size-4')}</span><span data-edit="professions.${i}.careers.${j}">${c}</span></li>`).join('')}</ul>
     <a class="btn-primary mt-5 w-full" href="${site.admission.applyUrl}" target="_blank" rel="noopener">${t('applyProgram')} ${icon('arrow', 'size-4')}</a>`;
 }
 
@@ -474,4 +475,6 @@ initInteractive();
 initReveal();
 renderNews(observeReveal);
 renderGallery(observeReveal);
+// Saytda bosib tahrirlash: /?edit=1 (admin panelga kirilgan bo'lsa)
+if (new URLSearchParams(location.search).has('edit')) import('./editor.js').then((m) => m.startEditor());
 initCampus();

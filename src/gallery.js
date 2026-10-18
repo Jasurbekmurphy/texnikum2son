@@ -1,7 +1,7 @@
 import * as raw from './data.js';
 import { localize, t } from './i18n.js';
 import { icon } from './icons.js';
-import { fileUrl, gallery as uploaded, pick } from './content.js';
+import { fileUrl, gallery as uploaded, pick, withTexts } from './content.js';
 
 // src/gallery/ ichidagi rasm va videolar build paytida avtomatik topiladi.
 // Papka nomi = bo'lim, fayl nomi = yozuv (batafsil: src/gallery/README.md).
@@ -17,7 +17,7 @@ const fulls = import.meta.glob('./gallery/**/*.{jpg,jpeg,png,webp,JPG,JPEG,PNG,W
 });
 const videos = import.meta.glob('./gallery/**/*.{mp4,webm,MP4,WEBM}', { eager: true, import: 'default', query: '?url' });
 
-const { professions, galleryText } = localize(raw);
+const { professions, galleryText } = withTexts(localize(raw));
 const byProf = new Map(professions.map((p) => [p.id, p]));
 const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 

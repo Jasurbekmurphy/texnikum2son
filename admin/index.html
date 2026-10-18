@@ -31,7 +31,8 @@
         <div class="mx-auto flex max-w-5xl items-center gap-3 px-4 py-3">
           <img src="/icon-192.png" alt="" class="size-9 rounded-lg ring-1 ring-slate-200" width="36" height="36" />
           <p class="min-w-0 flex-1 truncate font-bold">Admin panel</p>
-          <a class="btn-ghost" href="/" target="_blank" rel="noopener">Saytni ochish</a>
+          <a class="btn-primary" href="/?edit=1&lang=uz" target="_blank" rel="noopener">Saytda tahrirlash</a>
+          <a class="btn-ghost hidden sm:inline-flex" href="/" target="_blank" rel="noopener">Saytni ochish</a>
           <button class="btn-ghost" id="logout">Chiqish</button>
         </div>
         <nav class="no-scrollbar mx-auto flex max-w-5xl gap-2 overflow-x-auto px-4 pb-3" id="tabs">
@@ -68,6 +69,10 @@
                 <label class="field">Ish vaqti (inglizcha)<input name="hours_en" /></label>
                 <label class="field">Telegram havolasi<input name="telegram" type="url" /></label>
                 <label class="field">Instagram havolasi<input name="instagram" type="url" /></label>
+                <label class="field sm:col-span-2">Xarita
+                  <textarea name="map" rows="2" placeholder="40.9310, 72.4970"></textarea>
+                  <span class="text-xs font-normal text-slate-500">Google Maps'da texnikum binosini toping, ustiga o'ng tugmani bosing va chiqqan koordinatani (masalan 40.9310, 72.4970) shu yerga qo'ying. Yoki Ulashish → Xaritani joylashtirish kodini qo'ying.</span>
+                </label>
               </div>
             </div>
             <div class="flex items-center gap-3">
