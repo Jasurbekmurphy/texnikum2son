@@ -3,9 +3,13 @@
 # Ishlatish:  sudo bash /var/www/texnikum2son/deploy-update.sh   (yoki pastdagi ikki buyruq)
 set -euo pipefail
 cd /var/www/texnikum2son
-git fetch --depth 1 origin dist
-git reset --hard origin/dist
-echo "Sayt yangilandi: $(git log -1 --format='%h %cd' --date=format:'%Y-%m-%d %H:%M')"
+if [ "${1:-}" != "--pulled" ]; then
+  git fetch --depth 1 origin dist
+  git reset --hard origin/dist
+  echo "Sayt yangilandi: $(git log -1 --format='%h %cd' --date=format:'%Y-%m-%d %H:%M')"
+  # Skriptning o'zi ham yangilangan bo'lishi mumkin: qolgan qismini yangi nusxasi bajaradi
+  exec bash /var/www/texnikum2son/deploy-update.sh --pulled
+fi
 
 # Admin panel o'rnatilgan bo'lsa, uning jadvallari va server kodini ham yangilaymiz
 PB_DIR=/opt/texnikum-pb
