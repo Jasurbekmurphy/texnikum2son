@@ -2,6 +2,7 @@
 // Belgilangan matnlar ([data-edit] va index.html dagi [data-i18n]) joyida o'zgartiriladi
 // va serverdagi "texts" jadvaliga tanlangan til uchun yoziladi.
 import { lang, LANGS } from './i18n.js';
+import { translate } from './translate.js';
 
 const API = '/api';
 const esc = (s = '') => String(s).replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
@@ -135,9 +136,12 @@ export async function startEditor() {
       let translated = null;
       if (auto) {
         render('Tarjima qilinmoqda...');
-        translated = await api('/translate', 'POST', { from: lang, to: other, texts: list.map(([, v]) => v) })
-          .then((r) => r.texts)
-          .catch(() => null);
+        translated = await translate(
+          list.map(([, v]) => v),
+          lang,
+          other,
+          token,
+        ).catch(() => null);
       }
       const existing = new Map((await api('/collections/texts/records?perPage=1000&fields=id,key', 'GET')).items.map((r) => [r.key, r.id]));
       for (const [i, [key, value]] of list.entries()) {

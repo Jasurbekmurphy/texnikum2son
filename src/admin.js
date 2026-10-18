@@ -1,6 +1,7 @@
 // Admin panel (/admin): qabul va aloqa, yangiliklar, galereya.
 // Ma'lumotlar serverdagi PocketBase'da saqlanadi (server/README.md).
 import { galleryText, professions } from './data.js';
+import { translate } from './translate.js';
 
 const API = '/api';
 const $ = (s, el = document) => el.querySelector(s);
@@ -28,13 +29,18 @@ async function api(path, { method = 'GET', body } = {}) {
   return data;
 }
 
-// Inglizchasi bo'sh maydonlarni o'zbekchasidan tarjima qiladi (serverdagi /api/translate).
+// Inglizchasi bo'sh maydonlarni o'zbekchasidan tarjima qiladi (src/translate.js).
 // fields: ['title', 'body'] → title_uz → title_en. Tarjima ishlamasa, false qaytaradi.
 async function fillEnglish(get, set, fields) {
   const todo = fields.filter((f) => !get(`${f}_en`)?.trim() && get(`${f}_uz`)?.trim());
   if (!todo.length) return true;
   try {
-    const { texts } = await api('/translate', { method: 'POST', body: { from: 'uz', to: 'en', texts: todo.map((f) => get(`${f}_uz`)) } });
+    const texts = await translate(
+      todo.map((f) => get(`${f}_uz`)),
+      'uz',
+      'en',
+      token,
+    );
     todo.forEach((f, i) => set(`${f}_en`, texts[i]));
     return true;
   } catch {
